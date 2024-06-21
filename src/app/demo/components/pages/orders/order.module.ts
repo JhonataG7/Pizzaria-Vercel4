@@ -2,8 +2,8 @@
 import { NgModule } from '@angular/core'; // Decorador que marca uma classe como um módulo Angular
 import { CommonModule } from '@angular/common'; // Fornece diretivas comuns como ngIf e ngFor
 import { FormsModule } from '@angular/forms'; // Necessário para trabalhar com formulários no Angular
-import { OrderRoutingModule } from '../orders/order-routing.module'; // Módulo de roteamento personalizado para gerenciar as rotas relacionadas ao componente de pedidos
-import { OrderComponent } from '../orders/order.component'; // Componente personalizado que será declarado e usado neste módulo
+import { OrderRoutingModule } from '../orders/order.routing-module'; // Módulo de roteamento personalizado para gerenciar as rotas relacionadas ao componente de pedidos
+import { OrderComponent } from './order.component'; // Componente personalizado que será declarado e usado neste módulo
 
 // Importações do PrimeNG, uma biblioteca de componentes de UI para Angular
 import { TableModule } from 'primeng/table'; // Módulo de tabelas

@@ -1,5 +1,5 @@
 export const environment = {
-  production: true
+  production: true,
   firebase: {
     apiKey: "AIzaSyBrKWs9zVuXclPCEPadHap4OLkMTAh0JLM",
     authDomain: "pizzaria-vercel.firebaseapp.com",

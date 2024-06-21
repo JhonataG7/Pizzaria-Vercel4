@@ -16,7 +16,7 @@ import { PhotoService } from './demo/service/photo.service';
 import { AngularFireModule } from "@angular/fire/compat";
 import { AngularFireStorageModule } from "@angular/fire/compat/storage";
 import { environment } from "../environments/environment";
-import { OrderModule } from './demo/components/pages/orders/order.module'; 
+// import { OrdersModule } from '../app/demo/components/pages/orders/order.module'; // Corrigido o nome do módulo
 import { MessageService } from 'primeng/api';
 
 @NgModule({
@@ -29,9 +29,8 @@ import { MessageService } from 'primeng/api';
         AppRoutingModule,
         AppLayoutModule,
         AngularFireModule.initializeApp(environment.firebase),
-        AngularFireStorageModule,
-        OrderModule,
-        RouterModule.forRoot([]) 
+        AngularFireStorageModule, // Certifique-se de que o nome do módulo está correto
+        RouterModule.forRoot([])
     ],
     providers: [
         { provide: LocationStrategy, useClass: HashLocationStrategy },
@@ -46,4 +45,4 @@ import { MessageService } from 'primeng/api';
     ],
     bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

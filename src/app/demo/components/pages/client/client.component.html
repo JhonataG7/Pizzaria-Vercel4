@@ -1,0 +1,169 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <!-- Toast messages container -->
+            <p-toast></p-toast>
+            
+            <!-- Toolbar com botões Novo e Deletar -->
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <!-- Botão Novo -->
+                        <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+                        <!-- Botão Deletar -->
+                        <button pButton pRipple label="Deletar" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedClients()" [disabled]="!selectedClients || !selectedClients.length"></button>
+                    </div>
+                </ng-template>
+                <!-- Comentado: Componente de upload de arquivos e botão Export -->
+            </p-toolbar>
+
+            <!-- Tabela de clientes -->
+            <p-table #dt [value]="clients" [columns]="cols" responsiveLayout="scroll" [rows]="10" [globalFilterFields]="['name','country.name','representative.name','status']" [paginator]="true" [rowsPerPageOptions]="[10,20,30]" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [(selection)]="selectedClients" selectionMode="multiple" [rowHover]="true" dataKey="id">
+                <!-- Cabeçalho da tabela -->
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">Clientes</h5>
+                        <!-- Filtro global -->
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Procurar..."  class="w-full sm:w-auto"/>
+                        </span>
+                    </div>
+                </ng-template>
+                <!-- Cabeçalho das colunas da tabela -->
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 3rem">
+                            <!-- Checkbox para seleção em massa -->
+                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                        </th>
+                        <!-- Colunas da tabela -->
+                        <th pSortableColumn="name">Nome <p-sortIcon field="name"></p-sortIcon></th>
+                        <th pSortableColumn="category">Faixa Etaria <p-sortIcon field="category"></p-sortIcon></th>
+                        <th pSortableColumn="rating">Avaliação <p-sortIcon field="rating"></p-sortIcon></th>
+                        <th pSortableColumn="inventoryStatus">Sexo <p-sortIcon field="inventoryStatus"></p-sortIcon></th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <!-- Corpo da tabela -->
+                <ng-template pTemplate="body" let-client>
+                    <tr>
+                        <td>
+                            <!-- Checkbox para seleção individual -->
+                            <p-tableCheckbox [value]="client"></p-tableCheckbox>
+                        </td>
+                        <!-- Dados de cada cliente -->
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Name</span>
+                            {{client.name}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Category</span>
+                            {{client.category}}
+                        </td>
+                        <td style="width:14%; min-width: 10rem;"><span class="p-column-title">Reviews</span>
+                            <p-rating [ngModel]="client.rating" [readonly]="true" [cancel]="false"></p-rating>
+                        </td>
+                        <td style="width:14%; min-width: 10rem;"><span class="p-column-title">Status</span>
+                            <span [class]="'client-badge status-' + (client.inventoryStatus ? client.inventoryStatus.toLowerCase() : '')">{{client.inventoryStatus}}</span>
+                        </td>
+                        <td>
+                            <!-- Botões Editar e Deletar para cada cliente -->
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editClient(client)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteClient(client)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Diálogo para detalhes do cliente -->
+        <p-dialog [(visible)]="clientDialog" [style]="{width: '450px'}" header="Client Details" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <!-- Imagem do cliente -->
+                <img [src]="'assets/demo/images/client/' + client.image" [alt]="client.image" width="150" class="mt-0 mx-auto mb-5 block shadow-2" *ngIf="client.image">
+                <!-- Campos editáveis do cliente -->
+                <div class="field">
+                    <label for="name">Nome</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="client.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !client.name}"/>
+                    <small class="ng-dirty ng-invalid" *ngIf="submitted && !client.name">Nome é obrigatório.</small>
+                </div>
+                <div class="field">
+                    <label for="description">Descrição</label>
+                    <textarea id="description" pInputTextarea [(ngModel)]="client.description" required rows="3" cols="20"></textarea>
+                </div>
+                <div class="field">
+                    <label for="status">Sexo</label>
+                    <!-- Dropdown para selecionar o status -->
+                    <p-dropdown [(ngModel)]="client.inventoryStatus" inputId="inventoryStatus" optionValue="label" [options]="statuses" placeholder="Select">
+                        <ng-template pTemplate="selectedItem">
+                            <span *ngIf="client && client.inventoryStatus" [class]="'client-badge status-' + client.inventoryStatus.toString().toLowerCase()">{{client.inventoryStatus}}</span>
+                        </ng-template>
+                        <ng-template let-option pTemplate="item">
+                            <span [class]="'client-badge status-' + option.value">{{option.label}}</span>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+
+                <div class="field">
+                    <label class="mb-3">Faixa Etaria</label>
+                    <!-- Radiobuttons para faixa etária -->
+                    <div class="formgrid grid">
+                        <div class="field-radiobutton col-6">
+                            <p-radioButton id="category1" name="category" value="Crianca" [(ngModel)]="client.category"></p-radioButton>
+                            <label for="category1">Criança</label>
+                        </div>
+                        <div class="field-radiobutton col-6">
+                            <p-radioButton id="category2" name="category" value="Adolescente" [(ngModel)]="client.category"></p-radioButton>
+                            <label for="category2">Adolescente</label>
+                        </div>
+                        <div class="field-radiobutton col-6">
+                            <p-radioButton id="category3" name="category" value="Adulto" [(ngModel)]="client.category"></p-radioButton>
+                            <label for="category3">Adulto</label>
+                        </div>
+                        <div class="field-radiobutton col-6">
+                            <p-radioButton id="category4" name="category" value="Idoso" [(ngModel)]="client.category"></p-radioButton>
+                            <label for="category4">Idoso</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos comentados: Price e Quantity -->
+            </ng-template>
+
+            <!-- Botões de Cancelar e Salvar no rodapé do diálogo -->
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveClient()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Diálogo de confirmação para deletar cliente -->
+        <p-dialog [(visible)]="deleteClientDialog" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="client">Você tem certeza que quer deletar <b>{{client.name}}</b>?</span>
+            </div>
+            <!-- Botões de Não e Sim no rodapé do diálogo -->
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="deleteClientDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="confirmDelete()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Diálogo de confirmação para deletar clientes selecionados -->
+        <p-dialog [(visible)]="deleteClientsDialog" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span>Você tem certeza que quer deletar esse cliente?</span>
+            </div>
+            <!-- Botões de Não e Sim no rodapé do diálogo -->
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="deleteClientsDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="confirmDeleteSelected()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>
