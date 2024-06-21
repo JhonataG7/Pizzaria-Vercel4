@@ -9,4 +9,4 @@ import { PagesRoutingModule } from './pages-routing.module';
         PagesRoutingModule
     ]
 })
-export class PagesModule { }
+export class PagesModule {}

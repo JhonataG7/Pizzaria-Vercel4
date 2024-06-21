@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Product } from 'src/app/demo/api/product';
+import { Product } from './models/product.model'
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
-import { ProductService } from 'src/app/demo/service/product.service';
+import { ProductService } from './services/product.service';
 
 @Component({
     templateUrl: './crud.component.html',
@@ -33,7 +33,10 @@ export class CrudComponent implements OnInit {
     constructor(private productService: ProductService, private messageService: MessageService) { }
 
     ngOnInit() {
-        this.productService.getProducts().then(data => this.products = data);
+        this.productService.getProducts().subscribe((products: any)=>{
+            this.products = products
+            console.log(products)
+        });
 
         this.cols = [
             { field: 'product', header: 'Product' },
@@ -67,19 +70,25 @@ export class CrudComponent implements OnInit {
 
     deleteProduct(product: Product) {
         this.deleteProductDialog = true;
-        this.product = { ...product };
+        // this.product = { ...product };
+        this.productService.deleteProduct(product.key);
+        this.confirmDelete();
+
     }
 
     confirmDeleteSelected() {
         this.deleteProductsDialog = false;
-        this.products = this.products.filter(val => !this.selectedProducts.includes(val));
+        // this.products = this.products.filter(val => !this.selectedProducts.includes(val));
+        this.selectedProducts.forEach(product => {
+            this.productService.deleteProduct(product.key);
+        });
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
         this.selectedProducts = [];
     }
 
     confirmDelete() {
         this.deleteProductDialog = false;
-        this.products = this.products.filter(val => val.id !== this.product.id);
+        // this.products = this.products.filter(val => val.id !== this.product.id);
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
         this.product = {};
     }
@@ -96,15 +105,17 @@ export class CrudComponent implements OnInit {
             if (this.product.id) {
                 // @ts-ignore
                 this.product.inventoryStatus = this.product.inventoryStatus.value ? this.product.inventoryStatus.value : this.product.inventoryStatus;
-                this.products[this.findIndexById(this.product.id)] = this.product;
+                // this.products[this.findIndexById(this.product.id)] = this.product;
+                this.productService.updateProduct(this.product.key, this.product);
                 this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
             } else {
                 this.product.id = this.createId();
                 this.product.code = this.createId();
                 this.product.image = 'product-placeholder.svg';
                 // @ts-ignore
-                this.product.inventoryStatus = this.product.inventoryStatus ? this.product.inventoryStatus.value : 'INSTOCK';
-                this.products.push(this.product);
+                this.product.inventoryStatus = 'INSTOCK';
+                // this.products.push(this.product);
+                this.productService.addProduct(this.product);
                 this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
             }
 

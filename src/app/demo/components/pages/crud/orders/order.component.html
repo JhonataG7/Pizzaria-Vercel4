@@ -1,0 +1,130 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <!-- Toast messages container -->
+            <p-toast></p-toast>
+            
+            <!-- Toolbar com botões Novo e Deletar -->
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <!-- Botão Novo -->
+                        <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+                        <!-- Botão Deletar -->
+                        <button pButton pRipple label="Deletar" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedOrders()" [disabled]="!selectedOrders || !selectedOrders.length"></button>
+                    </div>
+                </ng-template>
+            </p-toolbar>
+
+            <!-- Tabela de pedidos -->
+            <p-table #dt [value]="orders" [columns]="cols" responsiveLayout="scroll" [rows]="10" [globalFilterFields]="['name','price','category']" [paginator]="true" [rowsPerPageOptions]="rowsPerPageOptions" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [(selection)]="selectedOrders" selectionMode="multiple" [rowHover]="true" dataKey="key">
+                <!-- Cabeçalho da tabela -->
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">Pedidos</h5>
+                        <!-- Filtro global -->
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Procurar..." class="w-full sm:w-auto"/>
+                        </span>
+                    </div>
+                </ng-template>
+                <!-- Cabeçalho das colunas da tabela -->
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 3rem">
+                            <!-- Checkbox para seleção em massa -->
+                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                        </th>
+                        <!-- Colunas da tabela -->
+                        <th pSortableColumn="name">Nome <p-sortIcon field="name"></p-sortIcon></th>
+                        <th pSortableColumn="price">Preço <p-sortIcon field="price"></p-sortIcon></th>
+                        <th pSortableColumn="category">Categoria <p-sortIcon field="category"></p-sortIcon></th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <!-- Corpo da tabela -->
+                <ng-template pTemplate="body" let-order>
+                    <tr>
+                        <td>
+                            <!-- Checkbox para seleção individual -->
+                            <p-tableCheckbox [value]="order"></p-tableCheckbox>
+                        </td>
+                        <!-- Dados de cada pedido -->
+                        <td>
+                            <span class="p-column-title">Name</span>
+                            {{ order.name }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Price</span>
+                            {{ order.price | currency:'BRL':'symbol':'1.2-2' }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Category</span>
+                            {{ order.category }}
+                        </td>
+                        <td>
+                            <!-- Botões Editar e Deletar para cada pedido -->
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editOrder(order)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteOrder(order)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Diálogo para detalhes do pedido -->
+        <p-dialog [(visible)]="orderDialog" [style]="{width: '450px'}" header="Detalhes do Pedido" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <!-- Campos editáveis do pedido -->
+                <div class="field">
+                    <label for="name">Nome</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="order.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !order.name}"/>
+                    <small class="ng-dirty ng-invalid" *ngIf="submitted && !order.name">Nome é obrigatório.</small>
+                </div>
+                <div class="field">
+                    <label for="price">Preço</label>
+                    <input type="number" pInputText id="price" [(ngModel)]="order.price" required min="0" step="any"/>
+                </div>
+                <div class="field">
+                    <label for="category">Categoria</label>
+                    <p-dropdown [(ngModel)]="order.category" inputId="category" optionLabel="label" [options]="categories" placeholder="Selecione"></p-dropdown>
+                </div>
+            </ng-template>
+
+            <!-- Botões de Cancelar e Salvar no rodapé do diálogo -->
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" (click)="saveOrder()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Diálogo de confirmação para deletar pedido -->
+        <p-dialog [(visible)]="deleteOrderDialog" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="order">Você tem certeza que quer deletar <b>{{ order.name }}</b>?</span>
+            </div>
+            <!-- Botões de Não e Sim no rodapé do diálogo -->
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="deleteOrderDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="confirmDelete()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Diálogo de confirmação para deletar pedidos selecionados -->
+        <p-dialog [(visible)]="deleteOrdersDialog" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span>Você tem certeza que quer deletar esses pedidos?</span>
+            </div>
+            <!-- Botões de Não e Sim no rodapé do diálogo -->
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="deleteOrdersDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="confirmDeleteSelected()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>
