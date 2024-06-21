@@ -1,10 +1,10 @@
 <div class="grid">
     <div class="col-12">
         <div class="card px-6 py-6">
-            <!-- Toast messages container -->
+            <!-- Contêiner para mensagens de toast -->
             <p-toast></p-toast>
             
-            <!-- Toolbar com botões Novo e Deletar -->
+            <!-- Barra de ferramentas com botões Novo e Deletar -->
             <p-toolbar styleClass="mb-4">
                 <ng-template pTemplate="left">
                     <div class="my-2">
@@ -17,7 +17,7 @@
             </p-toolbar>
 
             <!-- Tabela de pedidos -->
-            <p-table #dt [value]="orders" [columns]="cols" responsiveLayout="scroll" [rows]="10" [globalFilterFields]="['name','price','category']" [paginator]="true" [rowsPerPageOptions]="rowsPerPageOptions" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [(selection)]="selectedOrders" selectionMode="multiple" [rowHover]="true" dataKey="key">
+            <p-table #dt [value]="orders" [columns]="cols" responsiveLayout="scroll" [rows]="10" [globalFilterFields]="['name','price','category']" [paginator]="true" [rowsPerPageOptions]="rowsPerPageOptions" [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} entradas" [(selection)]="selectedOrders" selectionMode="multiple" [rowHover]="true" dataKey="key">
                 <!-- Cabeçalho da tabela -->
                 <ng-template pTemplate="caption">
                     <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -52,15 +52,15 @@
                         </td>
                         <!-- Dados de cada pedido -->
                         <td>
-                            <span class="p-column-title">Name</span>
+                            <span class="p-column-title">Nome</span>
                             {{ order.name }}
                         </td>
                         <td>
-                            <span class="p-column-title">Price</span>
+                            <span class="p-column-title">Preço</span>
                             {{ order.price | currency:'BRL':'symbol':'1.2-2' }}
                         </td>
                         <td>
-                            <span class="p-column-title">Category</span>
+                            <span class="p-column-title">Categoria</span>
                             {{ order.category }}
                         </td>
                         <td>
